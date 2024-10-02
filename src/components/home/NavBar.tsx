@@ -20,7 +20,7 @@ export default function Navbar() {
     const NavItems = () => (
         <>
             <Link
-                href="/chat"
+                href="/chats"
                 className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
             >
                 <MessageCircle size={20} />
@@ -31,7 +31,7 @@ export default function Navbar() {
                 className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
             >
                 <Phone size={20} />
-                <span>Calls</span>
+                <span>{"Calls"}</span>
             </Link>
             <Link
                 href="/contacts"

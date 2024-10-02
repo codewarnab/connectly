@@ -5,7 +5,7 @@ import TestimonialSection from "@/components/home/Testimonials";
 import PricingSection from "@/components/home/Pricing-Section";
 import CTASection from "@/components/home/CtaSection";
 import Footer from "@/components/home/Footer";
-
+ 
 export default function Home() {
   return (
     <div>
