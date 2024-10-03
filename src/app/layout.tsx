@@ -3,7 +3,8 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "@/styles/globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import ConvexClientProvider from "@/components/providers/convex-client-provider";
 
 
 const geistSans = localFont({
@@ -32,20 +33,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster
-          richColors
-          />
-          <TooltipProvider>
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Toaster
+              richColors
+            />
+            <TooltipProvider>
 
-            {children}
-          </TooltipProvider>
-        </ThemeProvider>
+              {children}
+            </TooltipProvider>
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

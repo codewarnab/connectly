@@ -7,6 +7,7 @@ import CTASection from "@/components/home/CtaSection";
 import Footer from "@/components/home/Footer";
  
 export default function Home() {
+  
   return (
     <div>
       <Navbar />
