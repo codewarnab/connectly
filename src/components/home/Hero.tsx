@@ -9,11 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Phone, Video, Image as ImageIcon, Mic, Send, MicOff, VideoOff, X, User } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from '@/hooks/use-toast'
-import {useAuth } from "@clerk/clerk-react";
-   
+
 
 export default function HomePage() {
-    console.log(useAuth());
+
     const [currentDemo, setCurrentDemo] = useState(0)
     const controls = useAnimation()
     const [isMounted, setIsMounted] = useState(false)
