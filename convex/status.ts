@@ -40,7 +40,7 @@ export const update = mutation({
 
         await ctx.db
             .patch(user._id, { status })
-        
+
         return { success: true }
 
     }

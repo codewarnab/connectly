@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Handshake, LaptopMinimal, Pencil, Sun, SunMoon, UserRound, UserRoundSearch } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { DialogTrigger, Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogTrigger, Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,18 +14,29 @@ import { Form, FormField, FormLabel, FormItem, FormControl, FormDescription, For
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { UserButton, useUser, } from "@clerk/nextjs";
+import { useMutationHandler } from "@/hooks/use-mutation-handler";
+import { toast } from "sonner";
+import { ConvexError } from "convex/values";
 
 // Validation schema for the form
 const addFriendFromSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
 });
 
-const Statuses = ['👋 Speak Freely', '🟢 Available', '🌙 Do Not Disturb', '💤 Away', '🔴 Busy'];
+const Statuses = ['👋 Speak Freely', '👨🏼‍💻 Coding',    '🟢 Available', '🌙 Do Not Disturb', '💤 Away', '🔴 Busy'];
 
 const ProfileDialogContent = () => {
-  const [updateStatus, setUpdateStatus] = useState(false);
+  const [updateStatusDialog, setUpdateStatusDialog] = useState(false);
   const [status, setStatus] = useState(Statuses[0]);
   const { setTheme } = useTheme();
+
+  const { user } = useUser();
+
+  const userDetail = useQuery(api.status.get, { clerkId: user?.id ?? '' });
+  const { mutate: updateStatus, state: updateStatusState } = useMutationHandler(api.status.update);
 
   const form = useForm<z.infer<typeof addFriendFromSchema>>({
     resolver: zodResolver(addFriendFromSchema),
@@ -36,13 +47,31 @@ const ProfileDialogContent = () => {
     console.log(email);
   }
 
+  async function updateStatusHandler() {
+
+    try {
+      await updateStatus({ clerkId: user?.id ?? '', status });
+      toast.success("Status updated successfully");
+      setStatus('');
+      setUpdateStatusDialog(false);
+
+    } catch (error) {
+      toast.error(
+        error instanceof ConvexError ? error.data : "An eror ocurred"
+      )
+      console.error("Mutation Error ", error);
+    }
+  }
+
+
+
   return (
     <div>
       <Card className='border-0 flex flex-col space-y-4'>
         <CardTitle>Profile</CardTitle>
         <div className="flex justify-center items-center">
           <Avatar className="h-20 w-20">
-            <AvatarImage src='https://github.com/shadcn.png' />
+            <AvatarImage src={userDetail?.imageUrl} />
             <AvatarFallback>User</AvatarFallback>
           </Avatar>
         </div>
@@ -52,13 +81,22 @@ const ProfileDialogContent = () => {
         {/* User Info */}
         <div className="flex items-center space-x-2">
           <UserRound />
-          <Input disabled value={"user name here"} className="border-none outline-none ring-0" />
+          <Input disabled value={userDetail?.username} className="border-none outline-none ring-0" />
         </div>
         <Separator />
 
         {/* Manage Account */}
         <div className="flex items-center justify-center">
-          <p>Manage Your Account</p>
+          <p className="mr-3">Manage Your Account</p>
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonPopoverCard: {
+                  pointerEvents: 'initial',
+                },
+              },
+            }}
+          />
         </div>
         <Separator />
 
@@ -71,6 +109,7 @@ const ProfileDialogContent = () => {
             </div>
           </DialogTrigger>
           <DialogContent>
+            <DialogTitle>Send Friend Request</DialogTitle>
             <Form {...form}>
               <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField control={form.control} name="email" render={({ field }) =>
@@ -101,6 +140,7 @@ const ProfileDialogContent = () => {
             </div>
           </DialogTrigger>
           <DialogContent>
+            <DialogTitle>View Friend Requests</DialogTitle>
             <div className="flex justify-center items-center">
               <p>No friend requests</p>
             </div>
@@ -109,15 +149,23 @@ const ProfileDialogContent = () => {
         <Separator />
 
         {/* Status Update */}
-        <Dialog open={updateStatus} onOpenChange={() => setUpdateStatus(!updateStatus)}>
+        <Dialog open={updateStatusDialog} onOpenChange={() => setUpdateStatusDialog(!updateStatusDialog)}>
           <DialogTrigger>
             <div className="flex items-center space-x-2">
               <Pencil />
-              <p>{'Display Current Status '}</p>
+              <p>{userDetail?.status}</p>
             </div>
           </DialogTrigger>
           <DialogContent>
-            <Textarea value={status} onChange={(e) => setStatus(e.target.value)} className="w-full h-48 resize-none" />
+            <DialogTitle>Update Status</DialogTitle>
+            <Textarea
+              placeholder={userDetail?.status}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full h-48 resize-none"
+              disabled={updateStatusState === 'loading'}
+            />
+            
             <div>
               {Statuses.map((s) => (
                 <p key={s} onClick={() => setStatus(s)} className="px-2 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer rounded-md">
@@ -125,6 +173,15 @@ const ProfileDialogContent = () => {
                 </p>
               ))}
             </div>
+            <Button
+              onClick={updateStatusHandler}
+              className={`ml-auto w-fit bg-primary-main dark:bg-blue-500 text-white`}
+              disabled={updateStatusState === 'loading'}
+              type='button'
+            >
+              Update status
+            </Button>
+
           </DialogContent>
         </Dialog>
 

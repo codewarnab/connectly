@@ -8,6 +8,6 @@ type sideBarWidthState = {
 };
 
 export const useSidebarWidth = create<sideBarWidthState>((set) => ({
-    sidebarWidth: 100, 
+    sidebarWidth: 40, 
     setSidebarWidth: width => set({ sidebarWidth: width }),
 }));
