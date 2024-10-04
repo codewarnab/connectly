@@ -1,8 +1,16 @@
 import React from 'react'
+import { SidebarContainer } from '@/components/Sidebar-Container'
+import { ChatList } from '@/components/ChatList'
 
 const ChatSidebar = () => {
   return (
-    <div>ChatSidebar</div>
+    <SidebarContainer 
+      title='Chats'
+      trigger={<div>Trigger</div>}
+    >
+      <ChatList />
+    </SidebarContainer>
+
   )
 }
 

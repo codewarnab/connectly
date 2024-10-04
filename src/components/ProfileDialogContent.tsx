@@ -1,93 +1,139 @@
-"use client";
-import { useState } from "react";
-import { useTheme } from "next-themes";
-import { Card, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Handshake, LaptopMinimal, Pencil, Sun, SunMoon, UserRound, UserRoundSearch } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { DialogTrigger, Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useTheme } from 'next-themes';
+import {
+  Handshake,
+  LaptopMinimal,
+  Loader2,
+  Pencil,
+  Sun,
+  SunMoon,
+  UserRound,
+  UserRoundSearch,
+} from 'lucide-react';
+import z from 'zod';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormField, FormLabel, FormItem, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { UserButton, useUser, } from "@clerk/nextjs";
-import { useMutationHandler } from "@/hooks/use-mutation-handler";
-import { toast } from "sonner";
-import { ConvexError } from "convex/values";
+import { useState } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { UserButton, useUser } from '@clerk/clerk-react';
+import { ConvexError } from 'convex/values';
+import { toast } from 'sonner';
 
-// Validation schema for the form
-const addFriendFromSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+import { Card, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useMutationHandler } from '@/hooks/use-mutation-handler';
+import { FriendRequestCard } from '@/components/friend-request-card';
+
+const statuses = [
+  '👋 Speak Freely',
+  '🤐 Encrypted',
+  '👍🏻 Free to chat',
+  '👨🏼‍💻 Coding',
+  '📴 Taking a break',
+];
+
+const addFriendFormSchema = z.object({
+  email: z.string().min(1, { message: 'Email is required' }).email(),
 });
-
-const Statuses = ['👋 Speak Freely', '👨🏼‍💻 Coding',    '🟢 Available', '🌙 Do Not Disturb', '💤 Away', '🔴 Busy'];
 
 const ProfileDialogContent = () => {
   const [updateStatusDialog, setUpdateStatusDialog] = useState(false);
-  const [status, setStatus] = useState(Statuses[0]);
+  const [status, setStatus] = useState('');
+  const [friendReqestModal, setFriendRequestModal] = useState(false);
   const { setTheme } = useTheme();
+  const { mutate: createFriendRequest, state: createFriendRequestState } =
+    useMutationHandler(api.friend_request.create);
+  const friendRequests = useQuery(api.friend_requests.get);
 
   const { user } = useUser();
 
-  const userDetail = useQuery(api.status.get, { clerkId: user?.id ?? '' });
-  const { mutate: updateStatus, state: updateStatusState } = useMutationHandler(api.status.update);
+  const userDetails = useQuery(api.status.get, { clerkId: user?.id  });
+  const { mutate: updateStatus, state: updateStatusState } = useMutationHandler(
+    api.status.update
+  );
 
-  const form = useForm<z.infer<typeof addFriendFromSchema>>({
-    resolver: zodResolver(addFriendFromSchema),
-    defaultValues: { email: '' },
+  const form = useForm<z.infer<typeof addFriendFormSchema>>({
+    resolver: zodResolver(addFriendFormSchema),
+    defaultValues: {
+      email: '',
+    },
   });
 
-  async function onSubmit({ email }: z.infer<typeof addFriendFromSchema>) {
-    console.log(email);
-  }
-
-  async function updateStatusHandler() {
-
+  async function friendRequestHandler({
+    email,
+  }: z.infer<typeof addFriendFormSchema>) {
     try {
-      await updateStatus({ clerkId: user?.id ?? '', status });
-      toast.success("Status updated successfully");
-      setStatus('');
-      setUpdateStatusDialog(false);
-
+      await createFriendRequest({ email });
+      form.reset();
+      toast.success('Friend request sent successfully');
+      setFriendRequestModal(false);
     } catch (error) {
       toast.error(
-        error instanceof ConvexError ? error.data : "An eror ocurred"
-      )
-      console.error("Mutation Error ", error);
+        error instanceof ConvexError ? error.data : 'An error occurred'
+      );
+      console.log('Error sending friend request:', error);
     }
   }
 
-
+  async function updateStatusHandler() {
+    try {
+      await updateStatus({ clerkId: user?.id, status });
+      toast.success('Status updated successfully');
+      setStatus('');
+      setUpdateStatusDialog(false);
+    } catch (error) {
+      toast.error(
+        error instanceof ConvexError ? error.data : 'An error occurred'
+      );
+      console.log('Error updating status', error);
+    }
+  }
 
   return (
     <div>
       <Card className='border-0 flex flex-col space-y-4'>
         <CardTitle>Profile</CardTitle>
-        <div className="flex justify-center items-center">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={userDetail?.imageUrl} />
-            <AvatarFallback>User</AvatarFallback>
+
+        <div>
+          <Avatar className='h-20 w-20 mx-auto'>
+            <AvatarImage src={userDetails?.imageUrl} />
+            <AvatarFallback>{userDetails?.username[0]}</AvatarFallback>
           </Avatar>
         </div>
       </Card>
 
-      <div className="flex flex-col gap-y-6 mt-4">
-        {/* User Info */}
-        <div className="flex items-center space-x-2">
+      <div className='flex flex-col gap-y-6 mt-4'>
+        <div className='flex items-center space-x-2'>
           <UserRound />
-          <Input disabled value={userDetail?.username} className="border-none outline-none ring-0" />
+          <Input
+            disabled
+            placeholder='Name'
+            value={userDetails?.username}
+            className='border-none outline-none ring-0'
+          />
         </div>
+
         <Separator />
 
-        {/* Manage Account */}
-        <div className="flex items-center justify-center">
-          <p className="mr-3">Manage Your Account</p>
+        <div className='flex items-center justify-center space-x-5'>
+          <p>Manage your account</p>
           <UserButton
             appearance={{
               elements: {
@@ -98,112 +144,165 @@ const ProfileDialogContent = () => {
             }}
           />
         </div>
+
         <Separator />
 
-        {/* Send Friend Request */}
-        <Dialog>
+        <Dialog
+          open={friendReqestModal}
+          onOpenChange={() => setFriendRequestModal(!friendReqestModal)}
+        >
           <DialogTrigger>
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <UserRoundSearch />
-              <p>Send Friend Request</p>
+              <p>Send friend request</p>
             </div>
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Send Friend Request</DialogTitle>
             <Form {...form}>
-              <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField control={form.control} name="email" render={({ field }) =>
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="friend@gmail.com" {...field} disabled />
-                    </FormControl>
-                    <FormDescription>Add a friend by entering their email address</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                } />
-                <Button type="submit" disabled className="w-full bg-blue-500 text-white p-2 rounded-md">
-                  Send Request
+              <form
+                onSubmit={form.handleSubmit(friendRequestHandler)}
+                className='space-y-8'
+              >
+                <FormField
+                  control={form.control}
+                  name='email'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={createFriendRequestState === 'loading'}
+                          placeholder='friend@email.com'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter your frien&apos;s email to send a friend request
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  disabled={createFriendRequestState === 'loading'}
+                  type='submit'
+                >
+                  Submit
                 </Button>
               </form>
             </Form>
           </DialogContent>
         </Dialog>
+
         <Separator />
 
-        {/* View Friend Requests */}
         <Dialog>
           <DialogTrigger>
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <Handshake />
-              <p>View Friend Requests</p>
+              <p>View friend requests</p>
+              {friendRequests && friendRequests.length > 0 && (
+                <Badge variant='outline'>{friendRequests.length}</Badge>
+              )}
             </div>
           </DialogTrigger>
+
           <DialogContent>
-            <DialogTitle>View Friend Requests</DialogTitle>
-            <div className="flex justify-center items-center">
-              <p>No friend requests</p>
-            </div>
+            {friendRequests ? (
+              friendRequests.length === 0 ? (
+                <p className='text-xl text-center font-bold'>
+                  No friend request yet
+                </p>
+              ) : (
+                <ScrollArea className='h-[400px] rounded-md'>
+                  {friendRequests.map(request => (
+                    <FriendRequestCard
+                      key={request.sender._id}
+                      email={request.sender.email}
+                      id={request._id}
+                      imageUrl={request.sender.imageUrl}
+                      username={request.sender.username}
+                    />
+                  ))}
+                </ScrollArea>
+              )
+            ) : (
+              <Loader2 />
+            )}
           </DialogContent>
         </Dialog>
+
         <Separator />
 
-        {/* Status Update */}
-        <Dialog open={updateStatusDialog} onOpenChange={() => setUpdateStatusDialog(!updateStatusDialog)}>
+        <Dialog
+          open={updateStatusDialog}
+          onOpenChange={() => setUpdateStatusDialog(!updateStatusDialog)}
+        >
           <DialogTrigger>
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <Pencil />
-              <p>{userDetail?.status}</p>
+              <p>{userDetails?.status}</p>
             </div>
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Update Status</DialogTitle>
             <Textarea
-              placeholder={userDetail?.status}
+              placeholder={userDetails?.status}
+              className='resize-none h-48'
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full h-48 resize-none"
+              onChange={e => setStatus(e.target.value)}
               disabled={updateStatusState === 'loading'}
             />
-            
             <div>
-              {Statuses.map((s) => (
-                <p key={s} onClick={() => setStatus(s)} className="px-2 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer rounded-md">
-                  {s}
+              {statuses.map(status => (
+                <p
+                  key={status}
+                  className='px-2 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer'
+                  onClick={() => setStatus(status)}
+                >
+                  {status}
                 </p>
               ))}
             </div>
             <Button
               onClick={updateStatusHandler}
-              className={`ml-auto w-fit bg-primary-main dark:bg-blue-500 text-white`}
+              className='ml-auto w-fit bg-primary-main'
               disabled={updateStatusState === 'loading'}
               type='button'
             >
               Update status
             </Button>
-
           </DialogContent>
         </Dialog>
 
         <Separator />
 
-        <ToggleGroup type="single" variant={'outline'}>
-          <ToggleGroupItem value="light" onClick={() => setTheme('light')} className="flex space-x-3">
+        <ToggleGroup type='single' variant='outline'>
+          <ToggleGroupItem
+            onClick={() => setTheme('light')}
+            value='light'
+            className='flex space-x-3'
+          >
             <Sun />
             <p>Light</p>
           </ToggleGroupItem>
-
-          <ToggleGroupItem value="dark" onClick={() => setTheme('dark')} className="flex space-x-3">
+          <ToggleGroupItem
+            onClick={() => setTheme('dark')}
+            value='dark'
+            className='flex space-x-3'
+          >
             <SunMoon />
             <p>Dark</p>
           </ToggleGroupItem>
-
-          <ToggleGroupItem value="system" onClick={() => setTheme('system')} className="flex space-x-3">
+          <ToggleGroupItem
+            onClick={() => setTheme('system')}
+            value='system'
+            className='flex space-x-3'
+          >
             <LaptopMinimal />
             <p>System</p>
           </ToggleGroupItem>
         </ToggleGroup>
-
       </div>
     </div>
   );
