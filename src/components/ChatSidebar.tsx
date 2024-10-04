@@ -1,12 +1,13 @@
 import React from 'react'
 import { SidebarContainer } from '@/components/Sidebar-Container'
 import { ChatList } from '@/components/ChatList'
+import { NewGroup } from '@/components/new-group'
 
 const ChatSidebar = () => {
   return (
-    <SidebarContainer 
+    <SidebarContainer
       title='Chats'
-      trigger={<div>Trigger</div>}
+      trigger={<NewGroup />}
     >
       <ChatList />
     </SidebarContainer>
