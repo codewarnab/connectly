@@ -10,7 +10,7 @@ import {
 } from 'convex/react';
 import { FaSignalMessenger } from 'react-icons/fa6';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';        
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!;
