@@ -4,7 +4,7 @@ import { FaSignalMessenger } from 'react-icons/fa6';
 
 import { NavigationBar } from '@/components/NaviGationBar';
 import { NewGroup } from '@/components/new-group';
-import { MobileChatContent } from '@/components/mobile-chat-content';
+import { MobileChatContent } from '@/components/Mobile-Chat-Content';
 
 const ChatPage = () => {
   return (
