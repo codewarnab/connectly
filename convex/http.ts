@@ -46,7 +46,7 @@ const handler = httpAction(async (ctx, req) => {
             console.log("updadting user with new data ", event.data.id)
             
             await ctx.runMutation(internal.user.create, {
-                username: `${event.data.first_name} ${event.data.last_name}`,
+                username: `${event.data.first_name} ${event.data.last_name || ""}`,
                 email: event.data.email_addresses[0].email_address,
                 clerkId: event.data.id,
                 imageUrl: event.data.image_url,

@@ -54,11 +54,12 @@ export const MessageItem: FC<MessageItemProps> = ({
                         }
                     )}
                 >
-                    {type == 'text' && (
-                        <p className='text-wrap break-words whitespace-pre-wrap break-all'>
+                    {type === 'text' && (
+                        <p className='text-wrap break-words whitespace-pre-wrap overflow-wrap break-word'>
                             {content}
                         </p>
                     )}
+
 
                     {type === 'audio' && (
                         <audio className='max-w-44 md:max-w-full' controls>
