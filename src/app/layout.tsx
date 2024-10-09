@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Manrope } from 'next/font/google'; // Import Manrope along with Inter
 
 import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -7,7 +7,9 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import ConvexClientProvider from '@/components/providers/convex-client-provider';
 
+// Load Inter and Manrope fonts
 const inter = Inter({ subsets: ['latin'] });
+const manrope = Manrope({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -21,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${manrope.className}`}> {/* Apply both fonts */}
         <ConvexClientProvider>
           <ThemeProvider
             attribute='class'

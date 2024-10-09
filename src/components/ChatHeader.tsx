@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, Phone, Video } from 'lucide-react';
+import { ChevronLeft, Phone, Video, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { FC } from 'react';
 import { useQuery } from 'convex/react';
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileSheet } from '@/components/profile-sheet';
 import { GroupSheet } from '@/components/group-sheet';
 import { TypingIndicator } from '@/components/TypingIndicator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type ChatHeaderProps = {
     chatAvatar: string;
@@ -48,33 +49,34 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
     return (
         <div
             className={cn(
-                'fixed bg-white dark:bg-gray-800 px-3 md:pr-10 flex items-center justify-between space-x-3 z-30 top-0 w-full h-20'
+                'fixed bg-gray-200 border-b dark:bg-gray-900  border-gray-200 dark:text-gray-100 px-4 md:px-6 flex items-center justify-between z-30 top-0 w-full h-16 shadow-sm',
             )}
-            style={isDesktop ? { width: `calc(100% - ${sidebarWidth + 3}%)` } : {}}
+            style={isDesktop ? { width: `calc(100% - ${sidebarWidth}px)` } : {}}
         >
-            <div className='flex space-x-3'>
-                <div className='md:hidden'>
-                    <Button asChild variant='outline' size='icon'>
+            <div className='flex items-center space-x-4'>
+                {!isDesktop && (
+                    <Button asChild variant='ghost' size='icon' className="mr-2">
                         <Link href='/chats'>
-                            <ChevronLeft />
+                            <ChevronLeft className="h-5 w-5" />
                         </Link>
                     </Button>
-                </div>
+                )}
                 <Sheet>
-                    <SheetTrigger className=' flex items-center cursor-pointer space-x-4'>
-                        <div className='relative flex flex-col gap-2 w-full'>
-                            <div className="flex items-center gap-2 w-full"> {/* Flex container for avatar and name */}
-                                <Avatar>
-                                    <AvatarImage src={chatAvatar} />
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" className="hover:bg-accent p-1 rounded-full">
+                            <div className='flex items-center space-x-3'>
+                                <Avatar className="h-9 w-9">
+                                    <AvatarImage src={chatAvatar} alt={username} />
                                     <AvatarFallback>{username[0]}</AvatarFallback>
                                 </Avatar>
-                                <h2 className='font-bold text-lg'>{username}</h2>
+                                <div className="flex flex-col items-start">
+                                    <h2 className='font-semibold text-base'>{username}</h2>
+                                    <TypingIndicator chatId={chatId} currentUserId={currentUserId} />
+                                </div>
                             </div>
-                            <TypingIndicator chatId={chatId} currentUserId={currentUserId} /> 
-                        </div>
-
+                        </Button>
                     </SheetTrigger>
-                    <SheetContent className='bg-white dark:bg-black dark:text-white w-80 md:w-96'>
+                    <SheetContent side="left" className='w-80 sm:w-96 p-0'>
                         {isGroup ? (
                             <GroupSheet chatId={chatId} groupName={username} />
                         ) : (
@@ -90,9 +92,43 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                 </Sheet>
             </div>
 
-            <div className='flex items-center space-x-4'>
-                <Video className='cursor-pointer' onClick={videoCall} />
-                <Phone className='cursor-pointer' onClick={videoCall} />
+            <div className='flex items-center space-x-2'>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={videoCall}>
+                                <Video className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Video call</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={videoCall}>
+                                <Phone className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Voice call</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>More options</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
         </div>
     );

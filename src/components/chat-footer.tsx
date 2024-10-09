@@ -1,24 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ConvexError } from 'convex/values';
-import { ChangeEvent, FC,  useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { api } from '../../convex/_generated/api';
 import Picker from '@emoji-mart/react';
-import { Paperclip, Send, Smile } from 'lucide-react';
+import { Mic, Send, Smile } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import data from '@emoji-mart/data';
 import TextareaAutoSize from 'react-textarea-autosize';
-import { FilePond, registerPlugin } from 'react-filepond';
-import 'filepond/dist/filepond.min.css';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
-import { v4 as uuid } from 'uuid';
 import { AudioRecorder } from 'react-audio-voice-recorder';
 import axios from 'axios';
-
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
 import { Form, FormControl, FormField } from '@/components/ui/form';
@@ -28,17 +21,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-    Dialog,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogContent,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { supabaseBrowserClient as supabase } from '@/supabase/supabaseClient';
+import { v4 as uuid } from 'uuid';
+import { FilePicker } from '@/components/file-picker';
 
 type ChatFooterProps = {
     chatId: string;
@@ -58,11 +43,9 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
     const { sidebarWidth } = useSidebarWidth();
     const { resolvedTheme } = useTheme();
     const [typing, setTyping] = useState(false);
-    const [imageOrPdf, setImageOrPdf] = useState<Blob | null>(null);
-    const [imageOrPdfModalOpen, setImageOrPdfModalOpen] = useState(false);
-    const [sendingFile, setSendingFile] = useState(false);
+    const [isRecording, setIsRecording] = useState(false)
 
-    registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType);
+
 
     const form = useForm<z.infer<typeof ChatMessageSchema>>({
         resolver: zodResolver(ChatMessageSchema),
@@ -112,57 +95,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
         }
     };
 
-    const handleImageUpload = async () => {
-        const uniqueId = uuid();
-        if (!imageOrPdf) return;
-        setSendingFile(true);
 
-        try {
-            let fileName;
-            if (imageOrPdf.type.startsWith('image/')) {
-                fileName = `chat/image-${uniqueId}.jpg`;
-            } else if (imageOrPdf.type.startsWith('application/pdf')) {
-                fileName = `chat/pdf-${uniqueId}.pdf`;
-            } else {
-                console.error('Invalid file type');
-                setSendingFile(false);
-                return;
-            }
-
-            const file = new File([imageOrPdf], fileName, { type: imageOrPdf.type });
-
-            const { data, error } = await supabase.storage
-                .from('chat-files')
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: false,
-                });
-
-            if (error) {
-                console.log('Error uploading file: ', error);
-                setSendingFile(false);
-                return;
-            }
-
-            const {
-                data: { publicUrl },
-            } = await supabase.storage.from('chat-files').getPublicUrl(data.path);
-
-            await createMessage({
-                conversationId: chatId,
-                type: imageOrPdf.type.startsWith('image/') ? 'image' : 'pdf',
-                content: [publicUrl],
-            });
-
-            setSendingFile(false);
-            setImageOrPdfModalOpen(false);
-        } catch (error) {
-            setSendingFile(false);
-            setImageOrPdfModalOpen(false);
-            console.log(error);
-            toast.error('Failed to send file, please try again');
-        }
-    };
 
     const addAudioElement = async (blob: Blob) => {
         try {
@@ -207,12 +140,15 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                 onSubmit={form.handleSubmit(createMessagehandler)}
             >
                 <Popover>
-                    <PopoverTrigger>
-                        <button type='button'>
+                    <PopoverTrigger className='md:block sm:hidden '>
+                        <button type='button'
+                            className='hidden md:block'
+                            aria-label="Open emoji picker"
+                        >
                             <Smile size={20} />
                         </button>
                     </PopoverTrigger>
-                    <PopoverContent className='w-fit p-0'>
+                    <PopoverContent className=' w-fit p-0'>
                         <Picker
                             theme={resolvedTheme}
                             data={data}
@@ -225,7 +161,12 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                         />
                     </PopoverContent>
                 </Popover>
-
+                <div className='sm:hidden block'>
+                    <FilePicker
+                        chatId={chatId}
+                        createMessage={createMessage}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name='content'
@@ -245,62 +186,40 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                                     disabled={createMessageState === 'loading'}
                                     placeholder='Type a message'
                                     onChange={handleInputChange}
-                                    className='flex-grow bg-gray-200 dark:bg-gray-600 rounded-2xl resize-none px-4 p-2 ring-0 focus:ring-0 focus:outline-none outline-none'
+                                    className='flex-grow bg-gray-100 dark:bg-gray-700 rounded-lg resize-none px-4 p-2 ring-0 focus:ring-0 focus:outline-none outline-none'
                                 />
                             </>
                         </FormControl>
                     )}
                 />
+                <div className='md:block hidden'>
+                    <FilePicker
+                        chatId={chatId}
+                        createMessage={createMessage}
+                    />
+                </div>
+                {form.watch('content') ? (
+                    <Send
+                        className="cursor-pointer"
+                        onClick={async () => form.handleSubmit(createMessageHandler)()}
+                    />
+                ) : (
+                    <div className="relative">
+                        {isRecording ? (
+                            <AudioRecorder
+                                onRecordingComplete={addAudioElement}
+                                onStop={() => setIsRecording(false)}
+                            />
+                        ) : (
+                            <Mic
+                                className="cursor-pointer"
+                                onClick={() => setIsRecording(true)}
+                            />
+                        )}
+                    </div>
+                )}
+               
 
-                <Send
-                    className='cursor-pointer'
-                    onClick={async () => form.handleSubmit(createMessagehandler)()}
-                />
-
-                <Dialog
-                    open={imageOrPdfModalOpen}
-                    onOpenChange={() => setImageOrPdfModalOpen(!imageOrPdfModalOpen)}
-                >
-                    <DialogTrigger>
-                        <Paperclip className='cursor-pointer' />
-                    </DialogTrigger>
-
-                    <DialogContent className='min-w-80'>
-                        <DialogHeader>
-                            <DialogTitle>Upload PDF / IMG</DialogTitle>
-                            <DialogDescription>📁 Upload</DialogDescription>
-                        </DialogHeader>
-
-                        <FilePond
-                            className='cursor-pointer'
-                            files={imageOrPdf ? [imageOrPdf] : []}
-                            allowReorder={false}
-                            onupdatefiles={fileItems => {
-                                if (fileItems.length > 0) {
-                                    setImageOrPdf(fileItems[0].file);
-                                } else {
-                                    setImageOrPdf(null);
-                                }
-                            }}
-                            allowMultiple={false}
-                            maxFiles={1}
-                            acceptedFileTypes={['image/*', 'application/pdf']}
-                            labelIdle='Drag & Drop your image/pdf or <span class="filepond--label-action">Browse</span>'
-                        />
-
-                        <DialogFooter>
-                            <Button
-                                type='button'
-                                disabled={sendingFile || !imageOrPdf}
-                                onClick={handleImageUpload}
-                            >
-                                Upload
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
-                <AudioRecorder onRecordingComplete={addAudioElement} />
             </form>
         </Form>
     );
