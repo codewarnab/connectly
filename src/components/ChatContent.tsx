@@ -82,6 +82,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 isGroup={conversation?.isGroup}
                 chatId={chatId}
                 status={status}
+                currentUserId={user?.id ?? ''}
             />
 
             <ScrollArea className="flex-1">

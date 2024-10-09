@@ -15,6 +15,7 @@ import { useIsDesktop } from '@/hooks/use-is-desktop';
 import { Button } from '@/components/ui/button';
 import { ProfileSheet } from '@/components/profile-sheet';
 import { GroupSheet } from '@/components/group-sheet';
+import { TypingIndicator } from '@/components/TypingIndicator';
 
 type ChatHeaderProps = {
     chatAvatar: string;
@@ -22,6 +23,7 @@ type ChatHeaderProps = {
     isGroup: boolean;
     chatId: string;
     status: string;
+    currentUserId: string;
 };
 
 export const ChatHeader: FC<ChatHeaderProps> = ({
@@ -30,6 +32,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
     isGroup,
     status,
     username,
+    currentUserId
 }) => {
     const { sidebarWidth } = useSidebarWidth();
     const isDesktop = useIsDesktop();
@@ -58,12 +61,18 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                     </Button>
                 </div>
                 <Sheet>
-                    <SheetTrigger className='flex items-center cursor-pointer space-x-4'>
-                        <Avatar>
-                            <AvatarImage src={chatAvatar} />
-                            <AvatarFallback>{username[0]}</AvatarFallback>
-                        </Avatar>
-                        <h2 className='font-bold text-lg'>{username}</h2>
+                    <SheetTrigger className=' flex items-center cursor-pointer space-x-4'>
+                        <div className='relative flex flex-col gap-2 w-full'>
+                            <div className="flex items-center gap-2 w-full"> {/* Flex container for avatar and name */}
+                                <Avatar>
+                                    <AvatarImage src={chatAvatar} />
+                                    <AvatarFallback>{username[0]}</AvatarFallback>
+                                </Avatar>
+                                <h2 className='font-bold text-lg'>{username}</h2>
+                            </div>
+                            <TypingIndicator chatId={chatId} currentUserId={currentUserId} /> 
+                        </div>
+
                     </SheetTrigger>
                     <SheetContent className='bg-white dark:bg-black dark:text-white w-80 md:w-96'>
                         {isGroup ? (

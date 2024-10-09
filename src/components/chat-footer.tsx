@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ConvexError } from 'convex/values';
-import { ChangeEvent, FC, useEffect, useState } from 'react';
+import { ChangeEvent, FC,  useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -17,7 +17,6 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import { v4 as uuid } from 'uuid';
 import { AudioRecorder } from 'react-audio-voice-recorder';
-import Pusher from 'pusher-js';
 import axios from 'axios';
 
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
@@ -59,7 +58,6 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
     const { sidebarWidth } = useSidebarWidth();
     const { resolvedTheme } = useTheme();
     const [typing, setTyping] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
     const [imageOrPdf, setImageOrPdf] = useState<Blob | null>(null);
     const [imageOrPdfModalOpen, setImageOrPdfModalOpen] = useState(false);
     const [sendingFile, setSendingFile] = useState(false);
@@ -70,24 +68,6 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
         resolver: zodResolver(ChatMessageSchema),
         defaultValues: { content: '' },
     });
-
-    useEffect(() => {
-        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-        });
-
-        const channel = pusher.subscribe(chatId);
-
-        channel.bind('typing', (data: { isTyping: boolean; userId: string }) => {
-            if (data.userId !== currentUserId) {
-                setIsTyping(data.isTyping);
-            }
-        });
-
-        return () => {
-            pusher.unsubscribe(chatId);
-        };
-    }, [chatId, currentUserId]);
 
     const createMessagehandler = async ({
         content,
@@ -188,7 +168,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
         try {
             const uniqueId = uuid();
 
-            const file = new File([blob], 'adio.webm', { type: blob.type });
+            const file = new File([blob], 'audio.webm', { type: blob.type });
             const fileName = `chat/audio-${uniqueId}`;
 
             const { data, error } = await supabase.storage
@@ -237,7 +217,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                             theme={resolvedTheme}
                             data={data}
                             onEmojiSelect={(emoji: any) =>
-                                form.setValue( 
+                                form.setValue(
                                     'content',
                                     `${form.getValues('content')}${emoji.native}`
                                 )
@@ -267,7 +247,6 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                                     onChange={handleInputChange}
                                     className='flex-grow bg-gray-200 dark:bg-gray-600 rounded-2xl resize-none px-4 p-2 ring-0 focus:ring-0 focus:outline-none outline-none'
                                 />
-                                {isTyping && <p className='text-xs ml-1'>typing...</p>}
                             </>
                         </FormControl>
                     )}
@@ -295,36 +274,33 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                         <FilePond
                             className='cursor-pointer'
                             files={imageOrPdf ? [imageOrPdf] : []}
-                            allowMultiple={false}
-                            acceptedFileTypes={['image/*', 'application/pdf']}
-                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                            allowReorder={false}
                             onupdatefiles={fileItems => {
-                                setImageOrPdf(fileItems[0]?.file ?? null);
+                                if (fileItems.length > 0) {
+                                    setImageOrPdf(fileItems[0].file);
+                                } else {
+                                    setImageOrPdf(null);
+                                }
                             }}
+                            allowMultiple={false}
+                            maxFiles={1}
+                            acceptedFileTypes={['image/*', 'application/pdf']}
+                            labelIdle='Drag & Drop your image/pdf or <span class="filepond--label-action">Browse</span>'
                         />
 
                         <DialogFooter>
                             <Button
-                                onClick={handleImageUpload}
                                 type='button'
-                                disabled={sendingFile}
+                                disabled={sendingFile || !imageOrPdf}
+                                onClick={handleImageUpload}
                             >
-                                Send
+                                Upload
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
-                {isDesktop && (
-                    <AudioRecorder
-                        onRecordingComplete={addAudioElement}
-                        audioTrackConstraints={{
-                            noiseSuppression: true,
-                            echoCancellation: true,
-                        }}
-                        downloadFileExtension='webm'
-                    />
-                )}
+                <AudioRecorder onRecordingComplete={addAudioElement} />
             </form>
         </Form>
     );
