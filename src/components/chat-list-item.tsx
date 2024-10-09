@@ -21,7 +21,6 @@ export const ChatListItem: FC<ChatListItemProps> = ({
   chatId,
   isActive,
   lastMessageContent,
-  lastMessageSender,
   name,
   timestamp,
   unseenMessageCount,
@@ -42,7 +41,7 @@ export const ChatListItem: FC<ChatListItemProps> = ({
         <div>
           <h2 className='font-bold'>{name}</h2>
           <p className='text-sm text-gray-700 dark:text-gray-400'>
-            {lastMessageContent}
+            { lastMessageContent}
           </p>
         </div>
       </div>
@@ -52,7 +51,7 @@ export const ChatListItem: FC<ChatListItemProps> = ({
           {timestamp && getFormattedTimestamp(timestamp)}
         </p>
         {unseenMessageCount && unseenMessageCount > 0 ? (
-          <Badge className='text-gray-500' variant='secondary'>
+          <Badge className='text-white bg-blue-500' variant='secondary'>
             {unseenMessageCount}
           </Badge>
         ) : null}
