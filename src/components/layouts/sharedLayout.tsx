@@ -47,6 +47,7 @@ const SharedLayout: FC<SharedLayoutProps> = ({
                 />
                 <ResizablePanel className='!overflow-y-auto py-16   bg-gray-200 dark:bg-gray-800'>
                     <div className='h-full hidden md:block '>{children}</div>
+
                 </ResizablePanel>
             </ResizablePanelGroup>
             <div className='md:hidden'>{children}</div>

@@ -1,0 +1,2 @@
+1.fix bug when first message is send goes behind the profile picture 
+2. fix image being hidden  behind the chatfooter after sending 

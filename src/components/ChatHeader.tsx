@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, MoreVertical, Phone, Video } from 'lucide-react';
+import { ChevronLeft, Phone, Video, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { FC } from 'react';
 import { useQuery } from 'convex/react';
@@ -17,6 +17,7 @@ import { ProfileSheet } from '@/components/profile-sheet';
 import { GroupSheet } from '@/components/group-sheet';
 import { TypingIndicator } from '@/components/TypingIndicator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 type ChatHeaderProps = {
     chatAvatar: string;
@@ -49,18 +50,21 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
     return (
         <div
             className={cn(
+
                 'fixed bg-gray-200 border-b dark:bg-gray-900  border-gray-200 dark:text-gray-100 px-4 md:px-6 flex items-center justify-between z-30 top-0 w-full h-16 shadow-sm'
+
             )}
-            style={isDesktop ? { width: `calc(100% - ${sidebarWidth + 3}%)` } : {}}
+            style={isDesktop ? { width: `calc(100% - ${sidebarWidth}px)` } : {}}
         >
             <div className='flex space-x-3'>
                 <div className='md:hidden'>
                     <Button asChild variant='ghost' size='icon'>
                         <Link href='/chats'>
                             <ChevronLeft className='h-5 w-5 ' />
+
                         </Link>
                     </Button>
-                </div>
+                )}
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button variant="ghost" className="hover:bg-accent p-1 rounded-full">
@@ -76,7 +80,9 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                             </div>
                         </Button>
                     </SheetTrigger>
+
                     <SheetContent  className='w-80 sm:w-96 p-0'>
+
                         {isGroup ? (
                             <GroupSheet chatId={chatId} groupName={username} />
                         ) : (
@@ -92,7 +98,9 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                 </Sheet>
             </div>
 
+
             <div className='flex items-center space-x-4'>
+
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={videoCall}>
@@ -103,6 +111,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                             <p>Video call</p>
                         </TooltipContent>
                     </Tooltip>
+
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={videoCall}>
@@ -113,6 +122,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                             <p>Voice call</p>
                         </TooltipContent>
                     </Tooltip>
+
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -123,6 +133,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                             <p>More options</p>
                         </TooltipContent>
                     </Tooltip>
+
             </div>
         </div>
     );

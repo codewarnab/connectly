@@ -22,9 +22,9 @@ export const ChatList: FC = () => {
         (directMessages && directMessages.length > 0);
 
     return (
-        <div className='flex flex-col space-y-2'>
+        <div className='flex flex-col space-y-2 '>
             {!hasConversations ? (
-                <div className='text-center text-gray-500'>No conversations yet</div>
+                <div className='text-center text-gray-500 '>No conversations yet</div>
             ) : (
                 <>
                     {directMessages && directMessages.length > 0

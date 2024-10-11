@@ -15,9 +15,10 @@ const page = ({
 }) => {
   return (
       <>
-          <div className="hidden md:block" >
+          <div className="hidden md:block   " >
               <NavigationBar trigger={<NewGroup/>} />
           </div>
+
           <ChatContent chatId={chatId} />
       </>
   )

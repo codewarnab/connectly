@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Pusher from 'pusher-js';
+
 import { useTheme } from 'next-themes';
 
 type TypingIndicatorProps = {
