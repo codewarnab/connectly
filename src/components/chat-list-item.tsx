@@ -41,7 +41,7 @@ export const ChatListItem: FC<ChatListItemProps> = ({
         <div>
           <h2 className='font-bold'>{name}</h2>
           <p className='text-sm text-gray-700 dark:text-gray-400'>
-            { lastMessageContent}
+            {lastMessageContent}
           </p>
         </div>
       </div>

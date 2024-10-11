@@ -201,7 +201,8 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                 {form.watch('content') ? (
                     <Send
                         className="cursor-pointer"
-                        onClick={async () => form.handleSubmit(createMessageHandler)()}
+                        onClick={async () => form.handleSubmit(createMessagehandler)()}
+
                     />
                 ) : (
                     <div className="relative">
@@ -218,7 +219,6 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
                         )}
                     </div>
                 )}
-               
 
             </form>
         </Form>

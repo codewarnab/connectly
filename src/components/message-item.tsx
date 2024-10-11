@@ -15,7 +15,8 @@ type MessageItemProps = {
     createdAt: number;
     type: string;
     seen?: ReactNode;
-    isGroup: boolean; 
+    isGroup: boolean;
+
 };
 
 export const MessageItem: FC<MessageItemProps> = ({
