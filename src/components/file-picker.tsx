@@ -1,7 +1,7 @@
 import { FC, useState } from 'react'
 import { supabaseBrowserClient as supabase } from '@/supabase/supabaseClient';
 import { v4 as uuid } from 'uuid';
-import { Paperclip } from 'lucide-react';
+import { Loader2, Paperclip } from 'lucide-react';
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
@@ -75,6 +75,7 @@ export const FilePicker: FC<{
 
             setSendingFile(false);
             setImageOrPdfModalOpen(false);
+            setImageOrPdf(null);
         } catch (error) {
             setSendingFile(false);
             setImageOrPdfModalOpen(false);
@@ -120,8 +121,17 @@ export const FilePicker: FC<{
                         type='button'
                         disabled={sendingFile || !imageOrPdf}
                         onClick={handleImageUpload}
+
                     >
-                        Upload
+                        {sendingFile ?
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading
+                            </>
+                            :
+                            'Upload'
+                        }
+
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -26,10 +26,13 @@ import { pluralize } from '@/lib/utils';
 type ActionButtonProps = {
     Icon: FC;
     label: string;
+    onClick: () => void;
 };
 
-const ActionButton: FC<ActionButtonProps> = ({ Icon, label }) => (
-    <div className='flex space-y-2 flex-col items-center w-fit px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800'>
+const ActionButton: FC<ActionButtonProps> = ({ Icon, label, onClick }) => (
+    <div className='flex space-y-2 flex-col items-center w-fit px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 cursor-pointer '
+        onClick={onClick}
+    >
         <Icon />
         <p className='text-xs'>{label}</p>
     </div>
@@ -51,6 +54,7 @@ type ProfileSheetProps = {
     }[]
     | undefined;
     chatAvatar: string;
+    videoCall: () => void;
 };
 
 export const ProfileSheet: FC<ProfileSheetProps> = ({
@@ -59,6 +63,7 @@ export const ProfileSheet: FC<ProfileSheetProps> = ({
     groupsInCommon,
     status,
     username,
+    videoCall,
 }) => {
     const [blockConfirmationDialog, setBlockConfirmationDialog] = useState(false);
 
@@ -95,8 +100,16 @@ export const ProfileSheet: FC<ProfileSheetProps> = ({
             <p className='text-center'>{status}</p>
 
             <div className='flex justify-center space-x-4 mt-5'>
-                <ActionButton Icon={Video} label='Video' />
-                <ActionButton Icon={Phone} label='Call' />
+                <ActionButton
+                    Icon={Video}
+                    label='Video'
+                    onClick={videoCall}
+                />
+                <ActionButton
+                    Icon={Phone}
+                    label='Call'
+                    onClick={videoCall}
+                />
             </div>
 
             <Separator className='my-5 border border-gray-100 dark:border-gray-800' />

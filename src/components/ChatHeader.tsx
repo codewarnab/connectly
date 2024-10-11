@@ -86,6 +86,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
                                 chatId={chatId}
                                 groupsInCommon={groupsInCommon}
                                 chatAvatar={chatAvatar}
+                                videoCall={videoCall}
                             />
                         )}
                     </SheetContent>

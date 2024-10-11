@@ -36,7 +36,7 @@ const SharedLayout: FC<SharedLayoutProps> = ({
                 <ResizablePanel
                     onResize={width => setSidebarWidth(width)}
                     defaultSize={sidebarWidth}
-                    maxSize={100}
+                    maxSize={40}   
                     minSize={20}
                 >
                     <SidebarComponent {...SidebarProps} />
