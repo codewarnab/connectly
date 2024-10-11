@@ -1,7 +1,7 @@
-import { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 import { Search } from 'lucide-react';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 
 type SidebarContainerProps = {
     children: ReactNode;
@@ -14,22 +14,37 @@ export const SidebarContainer: FC<SidebarContainerProps> = ({
     title,
     trigger,
 }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        // Implement search functionality here
+        console.log('Searching for:', searchQuery);
+    };
+
     return (
-        <ScrollArea className='h-full'>
-            <div className='px-4'>
-                <div className='flex items-center mt-10 justify-between'>
-                    <h2 className='text-2xl font-bold'>{title}</h2>
+        <ScrollArea className="h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="px-4 py-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-primary">{title}</h2>
                     <div>{trigger}</div>
                 </div>
-                <div className='my-4 h-8 bg-gray-200 dark:bg-gray-800 flex items-center p-2 rounded-xl'>
-                    <Search className='text-gray-500 mr-2' />
-                    <input
-                        type='text'
-                        placeholder='Search...'
-                        className='w-full h-8 p-2 rounded-lg outline-none bg-gray-200 dark:bg-gray-800'
-                    />
-                </div>
+                <form onSubmit={handleSearchSubmit} className="mb-6">
 
+                    <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        <Input
+                            placeholder="Search..."
+                            className="pl-8 bg-gray-100 dark:bg-gray-700 ring-0 focus:ring-0 focus:outline-none outline-none"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            aria-label="Search" />
+                    </div>
+                </form>
                 {children}
             </div>
         </ScrollArea>

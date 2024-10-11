@@ -46,7 +46,7 @@ export const ChatList: FC = () => {
                         : null}
                     {groupMessages && groupMessages.length > 0
                         ? groupMessages.map(
-                            ({ conversation, unseenCount, lastMessage, otherMember }) => (
+                            ({ conversation, unseenCount, lastMessage }) => (
                                 <ChatListItem
                                     key={conversation._id}
                                     name={conversation.name || ''}

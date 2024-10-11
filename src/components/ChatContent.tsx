@@ -75,7 +75,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
     const status = conversation?.otherMember?.status || ''
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col bg-gray-200 dark:bg-gray-900">
             <ChatHeader
                 chatAvatar={chatAvatar}
                 username={name!}
@@ -85,8 +85,8 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 currentUserId={user?.id ?? ''}
             />
 
-            <ScrollArea className="flex-1">
-                <div className="flex flex-col-reverse gap-2 p-3">
+            <ScrollArea className="flex-1  ">
+                <div className="flex flex-col-reverse gap-2 p-3 ">
                     {/* Map through messages and set ref for the latest message */}
                     {messages?.map((message, index) => (
                         <div
@@ -104,6 +104,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                                 seen={
                                     message.isCurrentUser ? getSeenMessage(message._id) : undefined
                                 }
+                                isGroup={conversation.isGroup}
                             />
                         </div>
                     ))}

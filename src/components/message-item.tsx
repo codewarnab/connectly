@@ -15,6 +15,7 @@ type MessageItemProps = {
     createdAt: number;
     type: string;
     seen?: ReactNode;
+    isGroup: boolean;
 };
 
 export const MessageItem: FC<MessageItemProps> = ({
@@ -26,6 +27,7 @@ export const MessageItem: FC<MessageItemProps> = ({
     senderName,
     type,
     seen,
+    isGroup,
 }) => {
     const formatTime = (timestamp: number) => format(timestamp, 'HH:mm');
 
@@ -45,9 +47,9 @@ export const MessageItem: FC<MessageItemProps> = ({
                     className={cn(
                         'px-3 py-1 flex flex-col space-x-2 items-center justify-between rounded-lg max-w-[80%]',
                         {
-                            'bg-blue-700 text-primary-foreground':
+                            'bg-blue-500 text-white':
                                 fromCurrentUser && type === 'text',
-                            'bg-secondary text-secondary-foreground':
+                            'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white':
                                 !fromCurrentUser && type === 'text',
                             'rounded-br-none': !lastByUser && fromCurrentUser,
                             'rounded-bl-none': !lastByUser && !fromCurrentUser,
@@ -59,7 +61,6 @@ export const MessageItem: FC<MessageItemProps> = ({
                             {content}
                         </p>
                     )}
-
 
                     {type === 'audio' && (
                         <audio className='max-w-44 md:max-w-full' controls>
@@ -92,12 +93,13 @@ export const MessageItem: FC<MessageItemProps> = ({
                     )}
 
                     <p
-                        className={cn('text-xs flex w-full my-1', {
-                            'text-primary-foreground justify-end': fromCurrentUser,
-                            'text-secondary-foreground justify-start': !fromCurrentUser,
-                            'dark:text-white text-black':
-                                type === 'audio' || type === 'image' || type === 'pdf',
-                        })}
+                        className={
+                            cn('text-xs flex w-full my-1', {
+                                'text-gray-300 justify-end': fromCurrentUser,
+                                'text-gray-400 justify-start': !fromCurrentUser,
+                                'dark:text-white text-black':
+                                    type === 'audio' || type === 'image' || type === 'pdf',
+                            })}
                     >
                         {formatTime(createdAt)}
                     </p>
@@ -105,16 +107,18 @@ export const MessageItem: FC<MessageItemProps> = ({
                 <span className='text-sm italic'>{seen}</span>
             </div>
 
-            <Avatar
-                className={cn('w-8 h-8 relative', {
-                    'order-2': fromCurrentUser,
-                    'order-1': !fromCurrentUser,
-                    invisible: lastByUser,
-                })}
-            >
-                <AvatarImage src={senderImage} alt={senderName} />
-                <AvatarFallback>{senderName.slice(0, 2)}</AvatarFallback>
-            </Avatar>
+            {isGroup && (
+                <Avatar
+                    className={cn('w-8 h-8 relative', {
+                        'order-2': fromCurrentUser,
+                        'order-1': !fromCurrentUser,
+                        invisible: lastByUser,
+                    })}
+                >
+                    <AvatarImage src={senderImage} alt={senderName} />
+                    <AvatarFallback>{senderName.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+            )}
         </div>
     );
 };
