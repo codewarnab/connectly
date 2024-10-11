@@ -2,9 +2,12 @@ import { FC, ReactNode } from 'react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { FileText } from 'lucide-react';
 
 type MessageItemProps = {
     fromCurrentUser: boolean;
@@ -71,26 +74,41 @@ export const MessageItem: FC<MessageItemProps> = ({
                     )}
 
                     {type === 'image' && (
-                        <Link
-                            href={content[0]}
-                            passHref
-                            target='_blank'
-                            rel='noopener noreferrer'
-                        >
-                            <Image
-                                src={content[0]}
-                                alt='image'
-                                width={240}
-                                height={112}
-                                className='rounded-xl w-60 object-cover h-28'
-                            />
-                        </Link>
+                        <>
+                            <PhotoProvider
+                                speed={() => 500}
+                            >
+                                <PhotoView src={content[0]}>
+                                    <Image
+                                        src={content[0]}
+                                        alt='image'
+                                        width={240}
+                                        height={112}
+                                        className='rounded-xl w-60  h-auto'
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                </PhotoView>
+                            </PhotoProvider>
+                        </>
                     )}
 
                     {type === 'pdf' && (
-                        <Link href={content[0]} target='_blank' rel='noopener noreferrer'>
-                            <p className='underline'>PDF Document</p>
+                        <Link
+                            href={content[0]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center p-3 space-x-3 transition-colors duration-200 rounded-lg bg-primary/10 hover:bg-primary/20"
+                        >
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20">
+                                <FileText className="w-6 h-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-medium text-primary">PDF Document</p>
+                                <p className="text-sm text-muted-foreground">Click to open</p>
+                            </div>
+                            
                         </Link>
+
                     )}
 
                     <p
@@ -99,7 +117,7 @@ export const MessageItem: FC<MessageItemProps> = ({
                                 'text-gray-300 justify-end': fromCurrentUser,
                                 'text-gray-400 justify-start': !fromCurrentUser,
                                 'dark:text-white text-black':
-                                    type === 'audio' || type === 'image' || type === 'pdf',
+                                    type === 'audio' || type === 'image',
                             })}
                     >
                         {formatTime(createdAt)}

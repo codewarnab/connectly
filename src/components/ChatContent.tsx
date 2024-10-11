@@ -1,15 +1,70 @@
-"use client";
-import { FC, useEffect, useRef } from 'react'
+"use client"
+
+import { FC, useEffect, useRef, useState } from 'react'
 import { Id } from '../../convex/_generated/dataModel'
 import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useUser } from '@clerk/clerk-react'
+import { MessageCircle, Send, Zap, Loader } from 'lucide-react'
 
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { ChatHeader } from '@/components/ChatHeader'
 import { MessageItem } from '@/components/message-item'
 import { ChatFooter } from '@/components/chat-footer'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from "@/components/ui/skeleton"
+
+const EmptyChatContent: FC = () => {
+    const animations = [
+        {
+            name: 'pulse',
+            icon: MessageCircle,
+            style: `
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `,
+            className: 'animate-pulse',
+        },
+        {
+            name: 'wave',
+            icon: Send,
+            style: `
+        @keyframes wave {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0); }
+        }
+      `,
+            className: 'animate-wave',
+        },
+        {
+            name: 'bounce',
+            icon: Zap,
+            style: `
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+      `,
+            className: 'animate-bounce',
+        }
+    ]
+
+    const [randomAnimation, setRandomAnimation] = useState(animations[Math.floor(Math.random() * animations.length)])
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full">
+            <style>{randomAnimation.style}</style>
+            <div className={`text-6xl mb-4 ${randomAnimation.className}`}>
+                <randomAnimation.icon size={48} />
+            </div>
+            <p className="text-lg text-gray-500 dark:text-gray-400">No messages yet. Start a conversation!</p>
+        </div>
+    )
+}
 
 export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => {
     const conversation = useQuery(api.conversation.get, { id: chatId })
@@ -27,7 +82,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
         api.conversation.markAsRead
     )
 
-    const latestMessageRef = useRef<HTMLDivElement | null>(null) // Ref for the latest message
+    const latestMessageRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         if (messages && messages.length > 0) {
@@ -35,12 +90,11 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
         }
     }, [chatId, markAsRead, messages])
 
-    // Scroll to the most recent message when the component renders
     useEffect(() => {
         if (latestMessageRef.current) {
             latestMessageRef.current.scrollIntoView({ behavior: 'smooth' })
         }
-    }, [messages]) // Depend on messages so it will scroll on new message arrival
+    }, [messages])
 
     const getSeenMessage = (messageId: Id<'messages'>) => {
         const seenUsers = members
@@ -59,8 +113,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
             case 2:
                 return `${seenUsers[0]} and ${seenUsers[1]} seen`
             default:
-                return `${seenUsers[0]}, ${seenUsers[1]} and ${seenUsers.length - 2
-                    } others seen`
+                return `${seenUsers[0]}, ${seenUsers[1]} and ${seenUsers.length - 2} others seen`
         }
     }
 
@@ -74,6 +127,22 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
         : conversation?.otherMember?.username || ''
     const status = conversation?.otherMember?.status || ''
 
+    const MessagesSkeleton = () => (
+        <div className="flex flex-col-reverse gap-3 p-4">
+            {[...Array(6)].map((_, index) => (
+                <div key={index} className={`flex ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex items-end space-x-2 ${index % 2 === 0 ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <div className={`flex flex-col ${index % 2 === 0 ? 'items-end' : 'items-start'}`}>
+                            <Skeleton className={`h-10 w-40 rounded-lg ${index % 2 === 0 ? 'rounded-br-none' : 'rounded-bl-none'}`} />
+                            <Skeleton className="h-3 w-16 mt-1" />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
+
     return (
         <div className="flex h-full flex-col bg-gray-200 dark:bg-gray-900">
             <ChatHeader
@@ -85,30 +154,35 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 currentUserId={user?.id ?? ''}
             />
 
-            <ScrollArea className="flex-1  ">
-                <div className="flex flex-col-reverse gap-2 p-3 ">
-                    {/* Map through messages and set ref for the latest message */}
-                    {messages?.map((message, index) => (
-                        <div
-                            ref={index === 0 ? latestMessageRef : null} // Assign ref to the latest message
-                            key={message._id}
-                        >
-                            <MessageItem
-                                content={message.content}
-                                createdAt={message._creationTime}
-                                lastByUser={messages[index - 1]?.senderId === message.senderId}
-                                fromCurrentUser={message.isCurrentUser}
-                                senderImage={message.senderImage}
-                                senderName={message.senderName}
-                                type={message.type}
-                                seen={
-                                    message.isCurrentUser ? getSeenMessage(message._id) : undefined
-                                }
-                                isGroup={conversation.isGroup}
-                            />
-                        </div>
-                    ))}
-                </div>
+            <ScrollArea className="flex-1">
+                {!messages ? (
+                    <MessagesSkeleton />
+                ) : messages.length === 0 ? (
+                    <EmptyChatContent />
+                ) : (
+                    <div className="flex flex-col-reverse gap-2 p-3">
+                        {messages.map((message, index) => (
+                            <div
+                                ref={index === 0 ? latestMessageRef : null}
+                                key={message._id}
+                            >
+                                <MessageItem
+                                    content={message.content}
+                                    createdAt={message._creationTime}
+                                    lastByUser={messages[index - 1]?.senderId === message.senderId}
+                                    fromCurrentUser={message.isCurrentUser}
+                                    senderImage={message.senderImage}
+                                    senderName={message.senderName}
+                                    type={message.type}
+                                    seen={
+                                        message.isCurrentUser ? getSeenMessage(message._id) : undefined
+                                    }
+                                    isGroup={conversation.isGroup}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </ScrollArea>
 
             <ChatFooter chatId={chatId} currentUserId={user?.id ?? ''} />
