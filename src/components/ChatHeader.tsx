@@ -64,7 +64,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
 
                         </Link>
                     </Button>
-                )}
+            </div>   
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button variant="ghost" className="hover:bg-accent p-1 rounded-full">
