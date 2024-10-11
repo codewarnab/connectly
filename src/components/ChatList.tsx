@@ -9,7 +9,7 @@ const SkeletonList = ({ count }: { count: number }) => {
     return (
         <>
             {Array.from({ length: count }).map((_, index) => (
-                <div key={index} className="flex items-center space-x-4 pb-5">
+                <div key={index} className="flex items-center space-x-4 pb-5 pl-3">
                     <UISkeleton className="h-12 w-12 rounded-full" />
                     <div className="space-y-2">
                         <UISkeleton className="h-4 w-[250px]" />
