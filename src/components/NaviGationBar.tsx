@@ -37,7 +37,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({ trigger }) => {
 
     return (
         <>
-            <div className='md:w-24 w-full md:h-screen h-20 bg-white dark:bg-slate-950 border-r md:border-r-gray-400 md:dark:border-r-gray-800 py-5 fixed z-10 flex md:flex-col items-center justify-between bottom-0 md:top-0 left-0'>
+            <div className='md:w-24 w-full md:h-screen h-20 bg-white dark:bg-slate-950 border-r md:border-r-gray-400 md:dark:border-r-gray-800 py-5 fixed z-50 flex md:flex-col items-center justify-between bottom-0 md:top-0 left-0'>
                 <div className='md:pt-10'>
                     <NavigationMenu orientation='vertical'>
                         <NavigationMenuList className='!w-svw md:!w-fit px-5 md:px-0 flex items-center justify-between md:flex-col md:space-y-4'>
