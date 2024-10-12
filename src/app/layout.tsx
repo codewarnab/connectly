@@ -9,7 +9,6 @@ import ConvexClientProvider from '@/components/providers/convex-client-provider'
 import { useEffect, useState } from 'react';
 import { DesktopLoader, MobileLoader } from '@/components/Loaders';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
-import { CopilotKit } from "@copilotkit/react-core";
 
 // Load Inter and Manrope fonts
 const inter = Inter({ subsets: ['latin'] });
@@ -28,12 +27,10 @@ export default function RootLayout({
   useEffect(() => {
     setTimeout(() => { setLoading(false); }, 1000);
   }, []);
-  const COPILOT_CLOUD_PUBLIC_API_KEY = process.env.NEXT_PUBLIC_COPILOT_CLOUD_PUBLIC_API_KEY;
 
   return (
     <html lang='en'>
       <body className={`${inter.className} ${manrope.className}`}>
-        <CopilotKit publicApiKey={COPILOT_CLOUD_PUBLIC_API_KEY} >
           <ConvexClientProvider>
             <ThemeProvider
               attribute='class'
@@ -49,7 +46,6 @@ export default function RootLayout({
               <Toaster richColors />
             </ThemeProvider>
           </ConvexClientProvider>
-        </CopilotKit>
       </body>
     </html>
   );

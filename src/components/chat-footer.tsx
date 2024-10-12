@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ConvexError } from 'convex/values';
-import { ChangeEvent, FC, useState, useMemo } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import Picker from '@emoji-mart/react';
 import { Mic, Send, Smile } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import data from '@emoji-mart/data';
+import TextareaAutoSize from 'react-textarea-autosize';
 import { AudioRecorder } from 'react-audio-voice-recorder';
 import axios from 'axios';
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
@@ -23,24 +24,10 @@ import {
 import { supabaseBrowserClient as supabase } from '@/supabase/supabaseClient';
 import { v4 as uuid } from 'uuid';
 import { FilePicker } from '@/components/file-picker';
-import { Id } from '../../convex/_generated/dataModel';
-import { CopilotTextarea } from "@copilotkit/react-textarea";
-import "@copilotkit/react-textarea/styles.css"
 
 type ChatFooterProps = {
     chatId: string;
     currentUserId: string;
-    messages: {
-        senderImage: string;
-        senderName: string;
-        isCurrentUser: boolean;
-        _id: Id<'messages'>;
-        _creationTime: number;
-        type: string;
-        conversationId: Id<'conversations'>;
-        senderId: Id<'users'>;
-        content: string[];
-    }[] | undefined;
 };
 
 const ChatMessageSchema = z.object({
@@ -49,38 +36,25 @@ const ChatMessageSchema = z.object({
     }),
 });
 
-export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, messages }) => {
-    const { mutate: createMessage, state: createMessageState } = useMutationHandler(api.messsage.create);
+export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId }) => {
+    const { mutate: createMessage, state: createMessageState } =
+        useMutationHandler(api.messsage.create);
     const isDesktop = useIsDesktop();
     const { sidebarWidth } = useSidebarWidth();
     const { resolvedTheme } = useTheme();
     const [typing, setTyping] = useState(false);
-    const [isRecording, setIsRecording] = useState(false);
+    const [isRecording, setIsRecording] = useState(false)
 
-    // Filter the last 10 text messages
-    const textMessages = useMemo(() =>
-        messages?.filter((message) => message.type === 'text').slice(-10), [messages]);
 
-    // Separate messages by current user and others, with names
-    const userMessages = useMemo(() =>
-        textMessages?.map((message) => ({
-            side: message.isCurrentUser ? 'me' : message.senderName,
-            content: message.content.join(' '),
-        })), [textMessages]);
-
-    // Create context for Copilot
-    const copilotContext = useMemo(() =>
-        userMessages?.reduce(
-            (context, message) => `${context}${message.side}: ${message.content}\n`,
-            ''
-        ), [userMessages]);
 
     const form = useForm<z.infer<typeof ChatMessageSchema>>({
         resolver: zodResolver(ChatMessageSchema),
         defaultValues: { content: '' },
     });
 
-    const createMessagehandler = async ({ content }: z.infer<typeof ChatMessageSchema>) => {
+    const createMessagehandler = async ({
+        content,
+    }: z.infer<typeof ChatMessageSchema>) => {
         if (!content || content.length < 1) return;
         try {
             await createMessage({
@@ -121,6 +95,8 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
         }
     };
 
+
+
     const addAudioElement = async (blob: Blob) => {
         try {
             const uniqueId = uuid();
@@ -141,7 +117,9 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
                 return;
             }
 
-            const { data: { publicUrl } } = await supabase.storage.from('chat-files').getPublicUrl(data.path);
+            const {
+                data: { publicUrl },
+            } = await supabase.storage.from('chat-files').getPublicUrl(data.path);
 
             await createMessage({
                 conversationId: chatId,
@@ -195,11 +173,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
                     render={({ field }) => (
                         <FormControl>
                             <>
-                                <CopilotTextarea
-                                    autosuggestionsConfig={{
-                                        textareaPurpose: ` Replying to a conversation , Here is the context of the conversation: ${copilotContext}`,
-                                        chatApiConfigs: {},
-                                    }}
+                                <TextareaAutoSize
                                     onKeyDown={async e => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
@@ -207,8 +181,8 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
                                         }
                                     }}
                                     rows={1}
+                                    maxRows={2}
                                     {...field}
-                                    disableBranding
                                     disabled={createMessageState === 'loading'}
                                     placeholder='Type a message'
                                     onChange={handleInputChange}
@@ -228,6 +202,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
                     <Send
                         className="cursor-pointer"
                         onClick={async () => form.handleSubmit(createMessagehandler)()}
+
                     />
                 ) : (
                     <div className="relative">
@@ -244,6 +219,7 @@ export const ChatFooter: FC<ChatFooterProps> = ({ chatId, currentUserId, message
                         )}
                     </div>
                 )}
+
             </form>
         </Form>
     );

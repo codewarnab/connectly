@@ -51,6 +51,7 @@ export  function CallContent() {
     const [meetingLink, setMeetingLink] = useState<string>('')
     const [generatedCode, setGeneratedCode] = useState<string>('')
     const [isCopied, setIsCopied] = useState<boolean>(false)
+    const [isJoining, setIsJoining] = useState<boolean>(false)
 
     
     const conversations = useQuery(api.conversations.get) as DirectMessage[] | undefined
@@ -88,11 +89,15 @@ export  function CallContent() {
     
 
     const joinMeeting = () => {
+        setIsJoining(true)
         console.log('Joining meeting:', meetingLink)
         router.push(`/calls/${meetingLink}`)
         toast('Joining meeting...', {
             description: 'Attempting to join the meeting...',
         })
+        setTimeout(() => {
+            setIsJoining(false)
+        },2000)
     }
 
     const handleMeetingLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -145,8 +150,8 @@ export  function CallContent() {
                                         onChange={handleMeetingLinkChange}
                                         className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                                     />
-                                    <Button onClick={joinMeeting} className="bg-blue-600 hover:bg-blue-700">
-                                        Join meeting
+                                    <Button onClick={joinMeeting} disabled={isJoining || !meetingLink}  className="bg-blue-600 hover:bg-blue-700">
+                                        {isJoining ? 'Joining...' : 'Join meeting'}
                                     </Button>
                                 </div>
                             </TabsContent>
