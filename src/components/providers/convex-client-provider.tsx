@@ -8,9 +8,8 @@ import {
     ConvexReactClient,
     Unauthenticated,
 } from 'convex/react';
-import { FaSignalMessenger } from 'react-icons/fa6';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';        
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -23,19 +22,24 @@ const ConvexClientProvider: FC<{ children: ReactNode }> = ({ children }) => {
             <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
                 <Authenticated>{children}</Authenticated>
                 <Unauthenticated>
-                    <div className='bg-slate-900 w-svw h-dvh grid place-content-center'>
-                        <div className='grid place-content-center mb-5'>
-                            <FaSignalMessenger size={100} className='text-primary-main' />
+                    <div className="bg-[#0a0f1a] w-screen h-screen flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="ml-16 mb-8">
+                                <Image src="/connectly.png" alt="Connectly" width={150} height={150} />
+                            </div>
+                            <Card className="bg-[#1c2333] border-none shadow-xl w-[300px] mx-auto">
+                                <CardHeader>
+                                    <CardTitle className="text-white text-2xl font-bold">Authenticate</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <SignInButton mode="modal">
+                                        <button className="w-full bg-[#3a86ff] text-white py-2 px-4 rounded-md hover:bg-[#2a76ef] transition duration-300 ease-in-out transform hover:scale-105">
+                                            Sign in
+                                        </button>
+                                    </SignInButton>
+                                </CardContent>
+                            </Card>
                         </div>
-
-                        <Card className='bg-slate-800 w-[350px] border-none shadow-xl'>
-                            <CardHeader>
-                                <CardTitle className='text-white'>Authenticate</CardTitle>
-                            </CardHeader>
-                            <CardContent className='text-white'>
-                                <SignInButton />
-                            </CardContent>
-                        </Card>
                     </div>
                 </Unauthenticated>
             </ConvexProviderWithClerk>
