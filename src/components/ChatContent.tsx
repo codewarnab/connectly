@@ -71,6 +71,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
     const messages = useQuery(api.messages.get, {
         id: chatId as Id<'conversations'>,
     })
+    console.log(messages)
 
     const members = conversation?.isGroup
         ? conversation?.otherMembers ?? []
@@ -185,7 +186,11 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 )}
             </ScrollArea>
 
-            <ChatFooter chatId={chatId} currentUserId={user?.id ?? ''} />
+            <ChatFooter
+                chatId={chatId}
+                currentUserId={user?.id ?? ''}
+                messages={messages}
+            />
         </div>
     )
 }
