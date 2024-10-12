@@ -100,8 +100,8 @@ export  function CallContent() {
     }
 
     return (
-        <div className="w-full  mx-auto p-4 flex flex-col lg:flex-row gap-4 bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100">
-            <div className="lg:w-1/2 space-y-4">
+        <div className="w-full  mx-auto p-4 flex flex-col lg:flex-row gap-4 bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100 ">
+            <div className="lg:w-1/2 space-y-4 h-full ">
                 <Card className="bg-white dark:bg-[#1e293b] border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-2xl font-bold">Calls</CardTitle>
