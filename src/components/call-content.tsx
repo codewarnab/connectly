@@ -68,8 +68,8 @@ export  function CallContent() {
     }
 
     const generateCode = () => {
-        const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-        setGeneratedCode(newCode)
+        const newCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`;
+        setGeneratedCode(newCode);
         toast(
             'Meeting code generated',
             {
@@ -78,8 +78,8 @@ export  function CallContent() {
                     onClick: copyCode,
                 },
             }
-        )
-    }
+        );
+    };
 
     const startQuickVideoCall = (id: string, name: string) => {
         toast(`Starting video call with ${name}`)
@@ -100,7 +100,7 @@ export  function CallContent() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-4 bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100">
+        <div className="w-full  mx-auto p-4 flex flex-col lg:flex-row gap-4 bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100">
             <div className="lg:w-1/2 space-y-4">
                 <Card className="bg-white dark:bg-[#1e293b] border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -124,6 +124,7 @@ export  function CallContent() {
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={copyCode}
+                                                disabled={isCopied}
                                                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                             >
                                                 {isCopied ? (

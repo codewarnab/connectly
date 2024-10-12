@@ -16,9 +16,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import ProfileDialogContent from '@/components/ProfileDialogContent';
+import ProfileCard from '@/components/Profile';
 
 type NavigationBarProps = {
     trigger: ReactNode;
@@ -75,20 +73,9 @@ export const NavigationBar: FC<NavigationBarProps> = ({ trigger }) => {
                 </div>
 
                 <div className='md:block hidden'>
-                    <Dialog>
                         <NavigationMenu orientation='vertical'>
-                            <DialogTrigger>
-                                <Avatar>
-                                    <AvatarImage src='https://github.com/shadcn.png' />
-                                    <AvatarFallback>User</AvatarFallback>
-                                </Avatar>
-                            </DialogTrigger>
-
-                            <DialogContent>
-                                <ProfileDialogContent />
-                            </DialogContent>
+                            <ProfileCard/>
                         </NavigationMenu>
-                    </Dialog>
                 </div>
             </div>
 
@@ -96,19 +83,7 @@ export const NavigationBar: FC<NavigationBarProps> = ({ trigger }) => {
                 <NavigationMenu orientation='horizontal'>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <Dialog>
-                                <NavigationMenu orientation='vertical'>
-                                    <DialogTrigger>
-                                        <Avatar>
-                                            <AvatarImage src='https://github.com/shadcn.png' />
-                                            <AvatarFallback>User</AvatarFallback>
-                                        </Avatar>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <ProfileDialogContent />
-                                    </DialogContent>
-                                </NavigationMenu>
-                            </Dialog>
+                            <ProfileCard/>
                         </NavigationMenuItem>
                     </NavigationMenuList>
                 </NavigationMenu>
