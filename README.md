@@ -118,6 +118,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-Your Name - [@codewarnab](https://twitter.com/codewarnab) - email@example.com
+Your Name - [@codewarnab](https://twitter.com/codewarnab) - dp950810@gmail.com
 
 Project Link: [https://github.com/codewarnab/connectly](https://github.com/codewarnab/connectly)
