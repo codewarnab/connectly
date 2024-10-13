@@ -5,7 +5,7 @@ import { Id } from '../../convex/_generated/dataModel'
 import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useUser } from '@clerk/clerk-react'
-import { MessageCircle, Send, Zap, Loader } from 'lucide-react'
+import { MessageCircle, Send, Zap,  } from 'lucide-react'
 
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { ChatHeader } from '@/components/ChatHeader'

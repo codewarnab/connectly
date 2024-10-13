@@ -39,7 +39,9 @@ export const ChatList: FC = () => {
             {conversations === undefined ? (
                 <SkeletonList count={5} />  
             ) : !hasConversations ? (
-            <div className='text-center text-gray-500'>No conversations yet</div>
+                    
+                    <div className='text-center text-gray-500'>
+                        No conversations yet,click on profile icon to send friend request</div>
             ) : (
             <>
                 {directMessages?.map(({ conversation, otherMember, unseenCount, lastMessage }) => (
