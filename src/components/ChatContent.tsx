@@ -1,11 +1,10 @@
 "use client"
-
 import { FC, useEffect, useRef, useState } from 'react'
 import { Id } from '../../convex/_generated/dataModel'
 import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useUser } from '@clerk/clerk-react'
-import { MessageCircle, Send, Zap, Loader } from 'lucide-react'
+import { MessageCircle, Send, Zap } from 'lucide-react'
 
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { ChatHeader } from '@/components/ChatHeader'
@@ -19,36 +18,19 @@ const EmptyChatContent: FC = () => {
         {
             name: 'pulse',
             icon: MessageCircle,
-            style: `
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.1); opacity: 0.7; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `,
+            style: `@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; }}`,
             className: 'animate-pulse',
         },
         {
             name: 'wave',
             icon: Send,
-            style: `
-        @keyframes wave {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-          100% { transform: translateY(0); }
-        }
-      `,
+            style: `@keyframes wave { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); }}`,
             className: 'animate-wave',
         },
         {
             name: 'bounce',
             icon: Zap,
-            style: `
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-      `,
+            style: `@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); }}`,
             className: 'animate-bounce',
         }
     ]
@@ -68,10 +50,10 @@ const EmptyChatContent: FC = () => {
 
 export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => {
     const conversation = useQuery(api.conversation.get, { id: chatId })
-    const messages = useQuery(api.messages.get, {
-        id: chatId as Id<'conversations'>,
-    })
-    console.log(messages)
+    const messages = useQuery(api.messages.get, { id: chatId as Id<'conversations'> })
+
+    const { user } = useUser()
+    const latestMessageRef = useRef<HTMLDivElement | null>(null)
 
     const members = conversation?.isGroup
         ? conversation?.otherMembers ?? []
@@ -79,17 +61,24 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
             ? [conversation.otherMember]
             : []
 
-    const { mutate: markAsRead, state: _ } = useMutationHandler(
-        api.conversation.markAsRead
-    )
-
-    const latestMessageRef = useRef<HTMLDivElement | null>(null)
+    const { mutate: markAsRead } = useMutationHandler(api.conversation.markAsRead)
 
     useEffect(() => {
-        if (messages && messages.length > 0) {
-            markAsRead({ conversationId: chatId, messageId: messages[0]._id })
+        const handleVisibilityChange = () => {
+            
+            if (document.visibilityState === 'visible' && messages && messages.length > 0) {
+                markAsRead({ conversationId: chatId, messageId: messages[0]._id })
+            }
         }
-    }, [chatId, markAsRead, messages])
+
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [messages, chatId, markAsRead])
 
     useEffect(() => {
         if (latestMessageRef.current) {
@@ -97,13 +86,27 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
         }
     }, [messages])
 
+    
+    useEffect(() => {
+        if (conversation) {
+            const title = conversation.isGroup
+                ? conversation.name
+                : conversation?.otherMember?.username ?? 'Chat'
+
+            document.title = title || 'Chat'
+
+            return () => {
+                document.title = 'connectly' 
+            }
+        }
+    }, [conversation])
+
     const getSeenMessage = (messageId: Id<'messages'>) => {
         const seenUsers = members
             .filter(member => member.lastSeenMessageId === messageId)
             .map(member => member.username?.split(' ')[0])
 
         if (seenUsers.length === 0) return undefined
-
         return formatSeenBy(seenUsers)
     }
 
@@ -118,14 +121,10 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
         }
     }
 
-    const { user } = useUser()
-
     if (!conversation) return null
 
     const chatAvatar = conversation?.otherMember?.imageUrl || ''
-    const name = conversation?.isGroup
-        ? conversation?.name
-        : conversation?.otherMember?.username || ''
+    const name = conversation?.isGroup ? conversation?.name : conversation?.otherMember?.username || ''
     const status = conversation?.otherMember?.status || ''
 
     const MessagesSkeleton = () => (
@@ -163,10 +162,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 ) : (
                     <div className="flex flex-col-reverse gap-2 p-3">
                         {messages.map((message, index) => (
-                            <div
-                                ref={index === 0 ? latestMessageRef : null}
-                                key={message._id}
-                            >
+                            <div ref={index === 0 ? latestMessageRef : null} key={message._id}>
                                 <MessageItem
                                     content={message.content}
                                     createdAt={message._creationTime}
@@ -175,9 +171,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                                     senderImage={message.senderImage}
                                     senderName={message.senderName}
                                     type={message.type}
-                                    seen={
-                                        message.isCurrentUser ? getSeenMessage(message._id) : undefined
-                                    }
+                                    seen={message.isCurrentUser ? getSeenMessage(message._id) : undefined}
                                     isGroup={conversation.isGroup}
                                 />
                             </div>
@@ -186,11 +180,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({ chatId }) => 
                 )}
             </ScrollArea>
 
-            <ChatFooter
-                chatId={chatId}
-                currentUserId={user?.id ?? ''}
-                messages={messages}
-            />
+            <ChatFooter chatId={chatId} currentUserId={user?.id ?? ''}  />
         </div>
     )
 }
