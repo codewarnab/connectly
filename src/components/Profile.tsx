@@ -56,6 +56,7 @@ export default function ProfileCard() {
     api.status.update
   )
 
+
   const form = useForm<z.infer<typeof addFriendFormSchema>>({
     resolver: zodResolver(addFriendFormSchema),
     defaultValues: {
@@ -91,15 +92,34 @@ export default function ProfileCard() {
     }
   }
 
-  const handleAcceptFriendRequest = (id: string) => {
-    // Implement accept friend request logic here
-    console.log(`Accepting friend request with id: ${id}`)
-  }
+  const { mutate: acceptRequest, state: acceptRequestState } =
+    useMutationHandler(api.friend_request.accept);
+  const { mutate: declineRequest, state: declineRequestState } =
+    
+    useMutationHandler(api.friend_request.decline);
+  const handleAcceptRequest = async (id: string) => {
+    try {
+      await acceptRequest({ id });
+      toast.success('Friend request accepted');
+    } catch (error) {
+      console.log('Error accepting friend request:', error);
+      toast.error(
+        error instanceof ConvexError ? error.data : 'An error occurred'
+      );
+    }
+  };
 
-  const handleRejectFriendRequest = (id: string) => {
-    // Implement reject friend request logic here
-    console.log(`Rejecting friend request with id: ${id}`)
-  }
+  const handleDenyRequest = async (id: string) => {
+    try {
+      await declineRequest({ id });
+      toast.success('Friend request declined');
+    } catch (error) {
+      console.log('Error declining friend request:', error);
+      toast.error(
+        error instanceof ConvexError ? error.data : 'An error occurred'
+      );
+    }
+  };
 
   return (
     <div className="flex items-center justify-center  bg-background text-foreground">
@@ -146,17 +166,17 @@ export default function ProfileCard() {
             </DropdownMenu>
             <Button variant="outline" className="justify-start">
               <div className="mr-2">
-              <UserButton
-                appearance={{
-                  elements: {
-                    userButtonPopoverCard: {
-                      pointerEvents: 'initial',
-                    },
-                  } 
-                }}
+                <UserButton
+                  appearance={{
+                    elements: {
+                      userButtonPopoverCard: {
+                        pointerEvents: 'initial',
+                      },
+                    }
+                  }}
                 />
-                </div>
-              
+              </div>
+
               Manage your account
             </Button>
             <Dialog>
@@ -232,14 +252,22 @@ export default function ProfileCard() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleAcceptFriendRequest(request._id)}
+                            disabled={
+                              acceptRequestState === 'loading' ||
+                              declineRequestState === 'loading'
+                            }
+                            onClick={() => handleAcceptRequest(request._id)}
                           >
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleRejectFriendRequest(request._id)}
+                            disabled={
+                              acceptRequestState === 'loading' ||
+                              declineRequestState === 'loading'
+                            }
+                            onClick={() => handleDenyRequest(request._id)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -250,7 +278,7 @@ export default function ProfileCard() {
                 </ScrollArea>
               </DialogContent>
             </Dialog>
-            
+
             <div className="flex justify-between items-center">
               <span className="font-medium">Theme</span>
               <DropdownMenu>
